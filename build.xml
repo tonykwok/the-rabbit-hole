@@ -23,7 +23,7 @@
   <property name="reports" value="${doc}/reports"/>
   <!-- TODO need a company-wide javadoc stylesheet -->
   <property name="stylesheet" location="${root}/doc/css/javadoc.css"/>
-  <property name="name" value="core"/>
+  <property name="name" value="furbelow"/>
   <property name="company" value="Technomage"/>
   <property name="company.full" value="Timothy Wall"/>
   <property name="copyright"
@@ -104,6 +104,7 @@
       <fileset dir="${src}">
         <patternset id="misc-files">
           <include name="**/*.png"/>
+          <include name="**/*.jpg"/>
           <include name="**/*.gif"/>
           <include name="**/*.properties"/>
         </patternset>

@@ -1,5 +1,4 @@
-package furbelow;
-/* Copyright (c) 2007 Timothy Wall, All Rights Reserved
+/* Copyright (c) 2006-2007 Timothy Wall, All Rights Reserved
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -11,6 +10,8 @@ package furbelow;
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.  
  */
+package furbelow;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;

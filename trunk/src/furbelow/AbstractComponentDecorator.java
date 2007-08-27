@@ -1,5 +1,3 @@
-package furbelow;
-
 /* Copyright (c) 2007 Timothy Wall, All Rights Reserved
  *
  * This library is free software; you can redistribute it and/or
@@ -12,6 +10,7 @@ package furbelow;
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.  
  */
+package furbelow;
 
 import java.awt.*;
 import java.awt.event.ComponentAdapter;

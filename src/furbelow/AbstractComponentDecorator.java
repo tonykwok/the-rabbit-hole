@@ -42,16 +42,20 @@ import javax.swing.border.LineBorder;
  * whenever the bounds returned by {@link #getDecorationBounds()} would change.
  * <p>
  * The decoration is clipped to the bounds set on the decoration, which does
- * not necessarily need to be the same as the decorated component bounds.  The
- * decoration may extend beyond the decorated component bounds, or it may be
- * reduced to a smaller region.  
+ * not necessarily need to be the same as the decorated component's bounds.
+ * The decoration may extend beyond the decorated component bounds, or it may
+ * be reduced to a smaller region.  
  */
 // NOTE: OSX 1.6 lacks hierarchy events that w32 sends on layer changes
 
 // TODO: should probably do some locking on Component.getTreeLock()
-// TODO: synch underlying cursor when decorator covers more than 
-// one component; the cursor should change if the decoration exceeds the 
-// component's bounds (add mouse listener)
+// when moving the component
+// TODO: need to synch underlying cursor when decorator covers more than 
+// one component; the cursor should change to match custom cursors if the
+// decoration exceeds the component's bounds (would need to add mouse motion
+// listener) 
+// TODO: set default layer according to decorated component's layer and z order
+// (have to calculate z order on 1.4 JVMs).
 public abstract class AbstractComponentDecorator {
     public static final Rectangle DEFAULT_BOUNDS = null;
     public static final int TOP = 0;
@@ -328,10 +332,17 @@ public abstract class AbstractComponentDecorator {
         repaint();
     }
     
+    /** Returns the decorated component. */
     protected JComponent getComponent() { return component; }
+
+    /** Returns the component used to paint the decoration and optionally
+     * track events.
+     */
     protected JComponent getPainter() { return painter; }
     
-    /** Set the cursor to appear anywhere over the decoration bounds. */
+    /** Set the cursor to appear anywhere over the decoration bounds. 
+     * If null, the cursor of the decorated component will be used.
+     */
     public void setCursor(Cursor cursor) {
         painter.setCursor(cursor);
     }
@@ -346,6 +357,14 @@ public abstract class AbstractComponentDecorator {
     
     /** Stop decorating. */
     public void dispose() {
+        // Disposal must occur on the EDT
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(new Runnable() { public void run() {
+                dispose();
+            }});
+            return;
+        }
+
         component.removeHierarchyListener(listener);
         component.removeComponentListener(listener);
         if (parent != null) {
@@ -394,7 +413,7 @@ public abstract class AbstractComponentDecorator {
     }
 
     /** Used to hook into the Swing painting architecture. */
-    private class Painter extends JComponent {
+    protected class Painter extends JComponent {
         private int base;
         private Cursor cursor;
         {
@@ -412,7 +431,9 @@ public abstract class AbstractComponentDecorator {
         public boolean isBackgroundDecoration() { 
             return layerOffset < 0; 
         }
-        /** Set the cursor to something else. */
+        /** Set the cursor to something else.  If null, the cursor of the
+         * decorated component will be used.
+         */
         public void setCursor(Cursor cursor) {
             Cursor oldCursor = getCursor();
             // Make sure the cursor actually changed, otherwise
@@ -634,12 +655,12 @@ public abstract class AbstractComponentDecorator {
             }
         }
         public void componentMoved(ComponentEvent e) {
-            // FIXME figure out why attach works and synch doesn't
+            // TODO figure out why attach works and synch doesn't
             // when painting a selection marquee over a decorated background
             attach();
         }
         public void componentResized(ComponentEvent e) {
-            // FIXME figure out why attach works and synch doesn't
+            // TODO figure out why attach works and synch doesn't
             // when painting a selection marquee over a decorated background
             attach();
         }

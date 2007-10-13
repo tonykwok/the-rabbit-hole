@@ -86,12 +86,32 @@ public class DecoratorDemo {
     private static final int LINE = 20;
 
     static class Labeler extends AbstractComponentDecorator {
+        private Point location = new Point(0, 0);
         public Labeler(JComponent target) {
             super(target);
         }
+        public void revalidate() {
+            if (isVisible()) {
+                Point location = getLocation();
+                Dimension size = getPreferredSize();
+                setDecorationBounds(location.x, location.y, size.width, size.height);
+            }
+        }
+        public Point getLocation() { return location; }
+        public void setLocation(int x, int y) {
+            if (!new Point(x, y).equals(location)) {
+                location = new Point(x, y);
+                Dimension d = getPreferredSize();
+                setDecorationBounds(x, y, d.width, d.height);
+            }
+        }
+        public Dimension getPreferredSize() {
+            return getComponent().getPreferredSize();
+        }
         public Rectangle getDecorationBounds() {
-            Rectangle r = super.getDecorationBounds();
+            Rectangle r = new Rectangle(super.getDecorationBounds());
             Rectangle visible = getComponent().getVisibleRect();
+            // adjust for horizontal scrolling
             if (r.x < visible.x)
                 r.x = visible.x;
             return r;
@@ -105,7 +125,7 @@ public class DecoratorDemo {
         }
     }
 
-    static final class Lines extends JComponent implements Scrollable {
+    static class Lines extends JComponent implements Scrollable {
         public Dimension getPreferredScrollableViewportSize() {
             return new Dimension(100, LINE*3);
         }
@@ -340,8 +360,16 @@ public class DecoratorDemo {
         JPanel box = new JPanel(new GridLayout(0, 1));
         p.add(box, BorderLayout.SOUTH);
 
-        JComponent lines = new Lines();
-        Labeler labeler = new Labeler(lines);
+        JComponent lines = new Lines() {
+            Labeler labeler = new Labeler(this);
+            public void setBounds(Rectangle bounds) {
+                super.setBounds(bounds);
+                // Update labeler immediately to avoid unnecessary repaints
+                // when the labeler bounds change
+                labeler.revalidate();
+                labeler.repaint();
+            }
+        };
         JScrollPane scroll = new JScrollPane(lines);
         scroll.setBorder(new TitledBorder("Partially-hovering labels"));
         p.add(scroll, BorderLayout.CENTER);

@@ -247,6 +247,13 @@
     </javadoc>
   </target>
 
+  <target name="sign" depends="jar">
+    <signjar alias="abbot" 
+             keystore="certs/signing-keystore" storepass="costello">
+      <fileset dir="${build}" includes="furbelow.jar"/>
+    </signjar>             
+  </target>
+
   <target name="clean" depends="dynamic-properties">
     <delete quiet="true" includeEmptyDirs="true">
       <fileset dir="${build}"/>

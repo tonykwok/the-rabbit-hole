@@ -38,8 +38,9 @@ import javax.swing.border.LineBorder;
  * of this object will live as long as its target component.<p>
  * By default, the decorator matches the location and size of the decorated 
  * component, but the bounds can be adjusted by overriding 
- * {@link #getDecorationBounds()}.  The {@link #synch()} method should be called
- * whenever the bounds returned by {@link #getDecorationBounds()} would change.
+ * {@link #getDecorationBounds()}.  The {@link #synch()} method should be
+ * called whenever the bounds returned by {@link #getDecorationBounds()} would
+ * change. 
  * <p>
  * The decoration is clipped to the bounds set on the decoration, which does
  * not necessarily need to be the same as the decorated component's bounds.
@@ -59,7 +60,8 @@ import javax.swing.border.LineBorder;
 public abstract class AbstractComponentDecorator {
     public static final Rectangle DEFAULT_BOUNDS = null;
     public static final int TOP = 0;
-    // Disabled for now, since it doesn't work properly
+    // Disabled for now, since the "bottom" layered pane position doesn't work
+    // as advertised.
     private static final int BOTTOM = -1;
     /** Account for the difference between the decorator actual origin
      * and the logical origin we want to pass to the {@link #paint} method.

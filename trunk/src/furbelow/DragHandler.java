@@ -302,9 +302,9 @@ public abstract class DragHandler
                 }
                 else {
                     if (dragIcon != null) {
-                        Window w = SwingUtilities.getWindowAncestor(dragSource);
-                        if (dragSource instanceof JComponent
-                            && w instanceof RootPaneContainer) {
+                        RootPaneContainer rpc = (RootPaneContainer)
+                            SwingUtilities.getAncestorOfClass(RootPaneContainer.class, dragSource);
+                        if (dragSource instanceof JComponent && rpc != null) {
                             Point screen = dragSource.getLocationOnScreen();
                             screen.translate(origin.x, origin.y);
                             ghost = createGhostedDragImage((JComponent)dragSource, screen, dragIcon, cursorOffset);

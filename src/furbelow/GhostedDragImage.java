@@ -90,13 +90,14 @@ public class GhostedDragImage extends AbstractComponentDecorator {
         setLocation(screenLocation.x - loc.x + imageOffset.x, 
                     screenLocation.y - loc.y + imageOffset.y);
         if (trackFrames) {
-            Window w = SwingUtilities.getWindowAncestor(root);
+            RootPaneContainer rpc = (RootPaneContainer)
+                SwingUtilities.getAncestorOfClass(RootPaneContainer.class, root);
             Frame[] frames = Frame.getFrames();
             //Log.debug("track " + frames.length + " other frames");
             for (int i=0;i < frames.length;i++) {
                 Frame frame = frames[i];
                 if (frame instanceof RootPaneContainer
-                    && frame.isShowing() && frame != w) {
+                    && frame.isShowing() && frame != rpc) {
                     //Log.debug("Track " + frame);
                     JLayeredPane p = ((RootPaneContainer)frame).getLayeredPane();
                     GhostedDragImage slave = 

@@ -344,13 +344,9 @@ public class DecoratorDemo {
         }
     }
 
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Decorator Demo");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    private static JPanel createDecoratedPanel(int margin) {
         JPanel p = new JPanel(new BorderLayout());
-        final int MARGIN = 10;
-        p.setBorder(BorderFactory.createEmptyBorder(MARGIN,MARGIN,MARGIN,MARGIN));
-
+        p.setBorder(BorderFactory.createEmptyBorder(margin,margin,margin,margin));
         JLabel banner = new JLabel("Decorator Demo");
         banner.setBorder(new CompoundBorder(new EmptyBorder(0,0,8,0), new LineBorder(Color.black)));
         Font f = banner.getFont();
@@ -405,7 +401,26 @@ public class DecoratorDemo {
         Spotlight s = new Spotlight(spot, 20);
         box.add(spot);
 
-        frame.getContentPane().add(p);
+        return p;
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Decorator Demo");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        final int MARGIN = 10;
+        JPanel p = createDecoratedPanel(MARGIN);
+
+        if (false) {
+            JTabbedPane tp = new JTabbedPane();
+            tp.add("blank", new JLabel("blank"));
+            tp.add("decorators", p);
+            tp.add("scrolled", new JScrollPane(createDecoratedPanel(MARGIN)));
+            
+            frame.getContentPane().add(tp);
+        }
+        else {
+            frame.getContentPane().add(p);
+        }
         frame.pack();
         frame.setVisible(true);
     }

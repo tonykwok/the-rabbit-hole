@@ -17,6 +17,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -106,6 +107,7 @@ public abstract class AbstractComponentDecorator {
         painter = new Painter();
         listener = new Listener();
         component.addHierarchyListener(listener);
+        component.addHierarchyBoundsListener(listener);
         component.addComponentListener(listener);
         attach();
     }
@@ -221,7 +223,8 @@ public abstract class AbstractComponentDecorator {
             Rectangle decorated = getDecorationBounds();
             Rectangle clipRect = clipDecorationBounds(decorated);
 
-            Point pt = SwingUtilities.convertPoint(component, clipRect.x, clipRect.y, 
+            Point pt = SwingUtilities.convertPoint(component,
+                                                   clipRect.x, clipRect.y, 
                                                    painterParent);
             if (clipRect.width <= 0 || clipRect.height <= 0) {
                 setPainterBounds(-1, -1, 0, 0);
@@ -329,8 +332,7 @@ public abstract class AbstractComponentDecorator {
     }
     
     protected void setPainterBounds(int x, int y, int w, int h) {
-        painter.setLocation(x, y);
-        painter.setSize(w, h);
+        painter.setBounds(x, y, w, h);
         repaint();
     }
     
@@ -368,6 +370,7 @@ public abstract class AbstractComponentDecorator {
         }
 
         component.removeHierarchyListener(listener);
+        component.removeHierarchyBoundsListener(listener);
         component.removeComponentListener(listener);
         if (parent != null) {
             parent.removeComponentListener(listener);
@@ -490,6 +493,7 @@ public abstract class AbstractComponentDecorator {
             this.layer = layer;
             key = key(layer);
             p.putClientProperty(key, this);
+            attach();
         }
         private int hideChildren(Container c) {
             if (c == null)
@@ -644,12 +648,20 @@ public abstract class AbstractComponentDecorator {
 
     /** Tracks changes to component configuration. */
     private final class Listener extends ComponentAdapter 
-        implements HierarchyListener, PropertyChangeListener {
+        implements HierarchyListener, HierarchyBoundsListener,
+                   PropertyChangeListener {
         // NOTE: OSX (1.6) doesn't generate these the same as w32
         public void hierarchyChanged(HierarchyEvent e) {
             if ((e.getChangeFlags() & HierarchyEvent.PARENT_CHANGED) != 0) {
                 attach();
             }
+        }
+
+        public void ancestorResized(HierarchyEvent e) {
+            synch();
+        }
+        public void ancestorMoved(HierarchyEvent e) {
+            synch();
         }
         public void propertyChange(PropertyChangeEvent e) {
             if (JLayeredPane.LAYER_PROPERTY.equals(e.getPropertyName())) {
@@ -657,14 +669,10 @@ public abstract class AbstractComponentDecorator {
             }
         }
         public void componentMoved(ComponentEvent e) {
-            // TODO figure out why attach works and synch doesn't
-            // when painting a selection marquee over a decorated background
-            attach();
+            synch();
         }
         public void componentResized(ComponentEvent e) {
-            // TODO figure out why attach works and synch doesn't
-            // when painting a selection marquee over a decorated background
-            attach();
+            synch();
         }
         public void componentHidden(ComponentEvent e) {
             setVisible(false);

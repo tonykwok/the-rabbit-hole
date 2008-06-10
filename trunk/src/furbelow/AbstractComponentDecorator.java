@@ -136,7 +136,7 @@ public abstract class AbstractComponentDecorator {
         return getToolTipText();
     }
     
-    /** Indicate whether any of the decoration is visible.  The decoration
+    /** Indicate whether the decoration is visible.  The decoration
      * may be clipped by ancestor scroll panes or by being moved outside
      * if the visible region of its parent window.
      */
@@ -424,6 +424,9 @@ public abstract class AbstractComponentDecorator {
         {
             setFocusable(false);
         }
+        public boolean isShowing() {
+            return getComponent().isShowing();
+        }
         public JComponent getComponent() {
             return AbstractComponentDecorator.this.getComponent();
         }
@@ -495,6 +498,7 @@ public abstract class AbstractComponentDecorator {
             p.putClientProperty(key, this);
             attach();
         }
+        // "Hide" children by temporarily setting the component count to zero
         private int hideChildren(Container c) {
             if (c == null)
                 return 0;
@@ -507,7 +511,7 @@ public abstract class AbstractComponentDecorator {
             }
             return value;
         }
-        
+        // Restore the child count
         private void restoreChildren(Container c, int count) {
             if (c != null) {
                 try {
@@ -527,6 +531,7 @@ public abstract class AbstractComponentDecorator {
         }
         
         private void paintBackground(Graphics g, JComponent jc) {
+            if (!jc.isShowing()) return;
             if (jc.isOpaque()) {
                 if (useSimpleBackground()) {
                     g.setColor(jc.getBackground());
@@ -579,6 +584,7 @@ public abstract class AbstractComponentDecorator {
             return list;
         }
         private void paintForeground(Graphics g, JComponent jc) {
+            if (!jc.isShowing()) return;
             List opaque = findOpaque(jc);
             List db = findDoubleBuffered(jc);
             jc.paint(g);
@@ -603,10 +609,11 @@ public abstract class AbstractComponentDecorator {
                 if (kids[i] instanceof Painter) {
                     Painter p = (Painter)kids[i];
                     if (p.isBackgroundDecoration() 
-                        && p.getDecoratedLayer() == layer
-                        && p.isShowing()) {
+                        && p.getDecoratedLayer() == layer) {
                         painters.add(p);
-                        area.add(new Area(p.getBounds()));
+                        if (p.isShowing()) {
+                            area.add(new Area(p.getBounds()));
+                        }
                     }
                 }
                 else if (lp.getLayer(kids[i]) == layer
@@ -618,23 +625,34 @@ public abstract class AbstractComponentDecorator {
                 dispose();
                 return;
             }
+            if (area.isEmpty()) {
+                return;
+            }
+
             g.setClip(area);
 
             // Paint background for that area
             for (Iterator i=components.iterator();i.hasNext();) {
                 JComponent c = (JComponent)i.next();
-                paintBackground(g, lp, c);
+                if (c.isShowing()) {
+                    paintBackground(g, lp, c);
+                }
             }
             
             // Paint the bg decorators
             for (Iterator i=painters.iterator();i.hasNext();) {
                 Painter p = (Painter)i.next();
-                p.paint(g.create(p.getX(), p.getY(), p.getWidth(), p.getHeight()));
+                if (p.isShowing()) {
+                    p.paint(g.create(p.getX(), p.getY(), p.getWidth(), p.getHeight()));
+                }
             }
             // Paint foreground for the area
             for (Iterator i=components.iterator();i.hasNext();) {
                 JComponent c = (JComponent)i.next();
-                paintForeground(g.create(c.getX(), c.getY(), c.getWidth(), c.getHeight()), c);
+                if (c.isShowing()) {
+                    paintForeground(g.create(c.getX(), c.getY(),
+                                             c.getWidth(), c.getHeight()), c);
+                }
             }
         }
         public void dispose() {

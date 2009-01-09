@@ -21,7 +21,6 @@
   <property name="test.src" location="test"/>
   <property name="doc" location="doc"/>
   <property name="reports" value="${doc}/reports"/>
-  <!-- TODO need a company-wide javadoc stylesheet -->
   <property name="stylesheet" location="${root}/doc/css/javadoc.css"/>
   <property name="name" value="furbelow"/>
   <property name="company" value="Technomage"/>

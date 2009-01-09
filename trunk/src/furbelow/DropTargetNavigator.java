@@ -131,17 +131,17 @@ public class DropTargetNavigator implements DragSourceListener, DragSourceMotion
     }
     public DropTargetNavigator(DragSource src) {
         this.dragSource = src;
-        System.err.println("Install listeners");
+        //System.err.println("Install listeners");
         src.addDragSourceListener(this);
         src.addDragSourceMotionListener(this);
-        System.err.println("Install queue");
+        //System.err.println("Install queue");
         try {
             queue = new DropTrackingQueue();
         }
         catch(Exception e) {
             // won't be able to track
         }
-        System.err.println("queue installed");
+        //System.err.println("queue installed");
     }
     private List getWindows(Window root) {
         List list = new ArrayList();
@@ -172,6 +172,21 @@ public class DropTargetNavigator implements DragSourceListener, DragSourceMotion
         }
         return comps;
     }
+
+    private JTabbedPane getTabbedPaneForTab(Component c) {
+        JTabbedPane p = (JTabbedPane)
+            SwingUtilities.getAncestorOfClass(JTabbedPane.class, c);
+        if (p != null) {
+            int count = p.getTabCount();
+            for (int i=0;i < count;i++) {
+                if (p.getComponentAt(i) == c) {
+                    break;
+                }
+            }
+        }
+        return p;
+    }
+
     /** Find the most likely drop target component at the given coordinate.
      */
     private Component findComponentAt(Window w, int wx, int wy) {
@@ -188,6 +203,12 @@ public class DropTargetNavigator implements DragSourceListener, DragSourceMotion
             SwingUtilities.getDeepestComponentAt(root, where.x, where.y);
         if (target == null)
             target = SwingUtilities.getDeepestComponentAt(w, wx, wy);
+
+        // Special case JTabbedPane tabs
+        JTabbedPane p = getTabbedPaneForTab(target);
+        if (p != null) {
+            target = p;
+        }
         return target;
     }
     private void update(Point screen) {
@@ -210,6 +231,7 @@ public class DropTargetNavigator implements DragSourceListener, DragSourceMotion
     }
     
     private void update(Component c, Point where) {
+
         if (needsAutoscroll(c) 
             && c instanceof JComponent && c instanceof Scrollable) {
             JComponent jc = (JComponent)c;
@@ -372,7 +394,6 @@ public class DropTargetNavigator implements DragSourceListener, DragSourceMotion
             if (e instanceof MouseEvent) {
                 // May not have security access to package sun.awt.dnd
                 if (e.getClass().getName().indexOf("SunDropTargetEvent") != -1) {
-                    System.out.println("got " + e);
                     MouseEvent me = (MouseEvent)e;
                     Point loc = me.getComponent().getLocationOnScreen();
                     loc.translate(me.getX(), me.getY());

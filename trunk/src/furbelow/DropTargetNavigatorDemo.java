@@ -110,7 +110,7 @@ public class DropTargetNavigatorDemo {
             public boolean importData(JComponent c, Transferable data) {
                 try {
                     String name = (String)data.getTransferData(DataFlavor.stringFlavor);
-                    tabs.add(createTab(name, 1), name);
+                    tabs.addTab(name, createTab(name, 1));
                     return true;
                 }
                 catch (Exception e) { 
@@ -121,7 +121,9 @@ public class DropTargetNavigatorDemo {
         });
         for (int i=0;i < 4;i++) {
             String name = "Tab " + i;
-            tabs.add(createTab(name, i), name);
+            tabs.addTab(name, createTab(name, i));
+            // Java 6 only:
+            //tabs.setTabComponentAt(i, new JLabel("*"+name+"*"));
         }
         return tabs;
     }
